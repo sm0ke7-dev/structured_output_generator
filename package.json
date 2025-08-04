@@ -1,0 +1,38 @@
+{
+  "name": "structured-output-generator",
+  "version": "1.0.0",
+  "description": "A TypeScript project for generating structured output",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/index.js",
+    "example": "node dist/example.js",
+    "test-api": "node dist/test-api.js",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix"
+  },
+  "keywords": [
+    "typescript",
+    "structured-output"
+  ],
+  "author": "",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@typescript-eslint/eslint-plugin": "^6.13.0",
+    "@typescript-eslint/parser": "^6.13.0",
+    "eslint": "^8.54.0",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.1",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "dotenv": "^17.2.1",
+    "openai": "^5.11.0"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
