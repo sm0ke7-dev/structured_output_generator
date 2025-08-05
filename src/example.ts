@@ -16,25 +16,24 @@ async function runExamples(): Promise<void> {
   // Initialize the generator
   const generator = new OpenAIGenerator();
 
-  // Example 1: Raccoons question
-  console.log('📝 Example 1: Raccoons and Human Safety');
+  // Example 1: Raccoons question (using default prompt)
+  console.log('📝 Example 1: Raccoons and Human Safety (Default Prompt)');
   await runExample(generator, {
-    keyword: 'Are raccoons a danger to humans?',
-    promptTemplate: 'Give me a list of subtopics related to the search keyphrase "{keyword}". For each subtopic, provide a heading and a brief description.'
+    keyword: 'Are raccoons a danger to humans?'
   });
 
-  // Example 2: Different topic
-  console.log('\n📝 Example 2: Climate Change');
+  // Example 2: Different topic (using analysis breakdown prompt)
+  console.log('\n📝 Example 2: Climate Change (Analysis Breakdown)');
   await runExample(generator, {
     keyword: 'Climate change effects on agriculture',
-    promptTemplate: 'Provide a structured list of subtopics for "{keyword}". Each subtopic should have a heading and description.'
+    promptId: 'analysis-breakdown'
   });
 
-  // Example 3: Custom prompt
-  console.log('\n📝 Example 3: Custom Prompt Template');
+  // Example 3: Best practices prompt
+  console.log('\n📝 Example 3: Remote Work (Best Practices)');
   await runExample(generator, {
     keyword: 'Best practices for remote work',
-    promptTemplate: 'Create a comprehensive list of key areas to consider for "{keyword}". Structure the response with clear headings and detailed descriptions for each area.'
+    promptId: 'best-practices'
   });
 }
 
@@ -80,25 +79,25 @@ async function runWithCustomAPIKey(): Promise<void> {
   }
 }
 
-// Example of how to change prompt template
+// Example of how to change default prompt ID
 async function runWithCustomTemplate(): Promise<void> {
-  console.log('\n🎨 Example with Custom Template');
+  console.log('\n🎨 Example with Custom Default Prompt ID');
   
   const generator = new OpenAIGenerator();
   
-  // Set a custom template
-  generator.setPromptTemplate('Analyze the topic "{keyword}" and break it down into key components. For each component, provide a title and explanation.');
+  // Set a custom default prompt ID
+  generator.setDefaultPromptId('step-by-step-guide');
   
   try {
     const response = await generator.generateStructuredOutput({
       keyword: 'Sustainable energy solutions'
     });
     
-    console.log('✅ Custom template example successful');
+    console.log('✅ Custom default prompt ID example successful');
     console.log(JSON.stringify(response, null, 2));
     
   } catch (error) {
-    console.error('❌ Custom template example failed:', error);
+    console.error('❌ Custom default prompt ID example failed:', error);
   }
 }
 

@@ -1,4 +1,5 @@
 import OpenAI from 'openai';
+import { pullPrompt } from './repositories/data/pull_prompt';
 
 // Define the structure for subtopics
 export interface Subtopic {
@@ -15,11 +16,12 @@ export interface StructuredResponse {
 export interface GenerateRequest {
   keyword: string;
   promptTemplate?: string;
+  promptId?: string;
 }
 
 export class OpenAIGenerator {
   private client: OpenAI;
-  private defaultPromptTemplate = 'Give me a list of subtopics related to the search keyphrase "{keyword}". For each subtopic, provide a heading and a brief description.';
+  private defaultPromptId = 'subtopics-default';
 
   constructor(apiKey?: string) {
     this.client = new OpenAI({
@@ -31,10 +33,21 @@ export class OpenAIGenerator {
    * Generate structured output from OpenAI API
    */
   async generateStructuredOutput(request: GenerateRequest): Promise<StructuredResponse> {
-    const { keyword, promptTemplate } = request;
+    const { keyword, promptTemplate, promptId } = request;
     
-    // Use custom prompt template or default
-    const prompt = (promptTemplate || this.defaultPromptTemplate).replace('{keyword}', keyword);
+    // Determine which prompt to use
+    let finalPrompt: string;
+    
+    if (promptTemplate) {
+      // Use custom prompt template if provided
+      finalPrompt = promptTemplate.replace('{keyword}', keyword);
+    } else if (promptId) {
+      // Use prompt from repository by ID
+      finalPrompt = pullPrompt(promptId).replace('{keyword}', keyword);
+    } else {
+      // Use default prompt
+      finalPrompt = pullPrompt(this.defaultPromptId).replace('{keyword}', keyword);
+    }
 
     try {
       const completion = await this.client.chat.completions.create({
@@ -46,7 +59,7 @@ export class OpenAIGenerator {
           },
           {
             role: 'user',
-            content: prompt
+            content: finalPrompt
           }
         ],
         response_format: { type: 'json_object' },
@@ -104,16 +117,16 @@ export class OpenAIGenerator {
   }
 
   /**
-   * Set a custom prompt template
+   * Set a custom default prompt ID
    */
-  setPromptTemplate(template: string): void {
-    this.defaultPromptTemplate = template;
+  setDefaultPromptId(promptId: string): void {
+    this.defaultPromptId = promptId;
   }
 
   /**
-   * Get the current prompt template
+   * Get the current default prompt ID
    */
-  getPromptTemplate(): string {
-    return this.defaultPromptTemplate;
+  getDefaultPromptId(): string {
+    return this.defaultPromptId;
   }
 } 
