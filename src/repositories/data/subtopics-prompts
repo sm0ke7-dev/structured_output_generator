@@ -1,0 +1,16 @@
+{
+  "subtopics-default": {
+    "name": "Default Subtopics Generator",
+    "description": "Generate a list of subtopics related to a keyword with headings and descriptions",
+    "template": "Give me a list of subtopics related to the search keyphrase \"{keyword}\". For each subtopic, provide a heading and a brief description.",
+    "category": "content-generation",
+    "tags": ["subtopics", "default", "general"],
+    "model": "gpt-4o",
+    "temperature": 0.3,
+    "maxTokens": 1500,
+    "systemPrompt": "You are a helpful assistant that provides structured responses. Always respond with valid JSON in this exact format: {\"response\": [{\"heading\": \"Title\", \"description\": \"Description\"}, {\"heading\": \"Title 2\", \"description\": \"Description 2\"}]}. Each item must have both \"heading\" and \"description\" fields.",
+    "responseFormat": {
+      "type": "json_object"
+    }
+  }
+} 

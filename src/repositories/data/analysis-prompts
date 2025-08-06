@@ -1,0 +1,26 @@
+{
+  "analysis-breakdown": {
+    "name": "Topic Analysis Breakdown",
+    "description": "Break down a topic into key components with detailed analysis",
+    "template": "Analyze the topic \"{keyword}\" and break it down into key components. For each component, provide a title and explanation.",
+    "category": "analysis",
+    "tags": ["analysis", "breakdown", "components"],
+    "model": "gpt-4o",
+    "temperature": 0.2,
+    "maxTokens": 2000,
+    "systemPrompt": "You are an analytical assistant that provides structured responses. Always respond with valid JSON in this exact format: {\"response\": [{\"heading\": \"Title\", \"description\": \"Description\"}, {\"heading\": \"Title 2\", \"description\": \"Description 2\"}]}. Each item must have both \"heading\" and \"description\" fields.",
+    "responseFormat": { "type": "json_object" }
+  },
+  "comparison-analysis": {
+    "name": "Comparison Analysis",
+    "description": "Compare different aspects or options related to a topic",
+    "template": "Provide a structured comparison of different aspects related to \"{keyword}\". For each aspect, provide a heading and detailed comparison points.",
+    "category": "analysis",
+    "tags": ["comparison", "analysis", "evaluation"],
+    "model": "gpt-4o",
+    "temperature": 0.1,
+    "maxTokens": 2500,
+    "systemPrompt": "You are a comparison assistant that provides structured responses. Always respond with valid JSON in this exact format: {\"response\": [{\"heading\": \"Title\", \"description\": \"Description\"}, {\"heading\": \"Title 2\", \"description\": \"Description 2\"}]}. Each item must have both \"heading\" and \"description\" fields.",
+    "responseFormat": { "type": "json_object" }
+  }
+} 

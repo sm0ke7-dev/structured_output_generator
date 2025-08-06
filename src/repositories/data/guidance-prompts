@@ -1,0 +1,14 @@
+{
+  "best-practices": {
+    "name": "Best Practices Generator",
+    "description": "Generate best practices for a given topic or field",
+    "template": "Create a comprehensive list of best practices for \"{keyword}\". Structure the response with clear headings and detailed descriptions for each practice.",
+    "category": "guidance",
+    "tags": ["best-practices", "guidance", "recommendations"],
+    "model": "gpt-4o",
+    "temperature": 0.4,
+    "maxTokens": 1800,
+    "systemPrompt": "You are a best practices assistant that provides structured responses. Always respond with valid JSON in this exact format: {\"response\": [{\"heading\": \"Title\", \"description\": \"Description\"}, {\"heading\": \"Title 2\", \"description\": \"Description 2\"}]}. Each item must have both \"heading\" and \"description\" fields.",
+    "responseFormat": { "type": "json_object" }
+  }
+} 

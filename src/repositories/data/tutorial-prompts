@@ -1,0 +1,14 @@
+{
+  "step-by-step-guide": {
+    "name": "Step-by-Step Guide",
+    "description": "Create a step-by-step guide for a process or procedure",
+    "template": "Create a step-by-step guide for \"{keyword}\". Each step should have a clear heading and detailed instructions.",
+    "category": "tutorial",
+    "tags": ["tutorial", "steps", "guide"],
+    "model": "gpt-4o",
+    "temperature": 0.2,
+    "maxTokens": 2200,
+    "systemPrompt": "You are a tutorial assistant that provides structured responses. Always respond with valid JSON in this exact format: {\"response\": [{\"heading\": \"Title\", \"description\": \"Description\"}, {\"heading\": \"Title 2\", \"description\": \"Description 2\"}]}. Each item must have both \"heading\" and \"description\" fields.",
+    "responseFormat": { "type": "json_object" }
+  }
+} 

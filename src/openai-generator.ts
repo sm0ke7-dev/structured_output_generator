@@ -1,5 +1,5 @@
 import OpenAI from 'openai';
-import { pullPrompt } from './repositories/data/pull_prompt';
+import { pullPrompt, pullPromptTemplate } from './repositories/pull_prompt';
 
 // Define the structure for subtopics
 export interface Subtopic {
@@ -12,11 +12,29 @@ export interface StructuredResponse {
   response: Subtopic[];
 }
 
+// Define response format options
+export interface ResponseFormat {
+  type: 'json_object' | 'text';
+}
+
 // Define the input structure
 export interface GenerateRequest {
+  // Core content
   keyword: string;
   promptTemplate?: string;
   promptId?: string;
+  
+  // Model configuration
+  model?: string;           // "gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo", etc.
+  temperature?: number;     // 0.0 to 2.0
+  maxTokens?: number;       // max_tokens
+  
+  // Custom prompts
+  systemPrompt?: string;    // Override default system prompt
+  userPrompt?: string;      // Override the generated user prompt
+  
+  // Response format
+  responseFormat?: { type: 'json_object' | 'text' };
 }
 
 export class OpenAIGenerator {
@@ -33,38 +51,64 @@ export class OpenAIGenerator {
    * Generate structured output from OpenAI API
    */
   async generateStructuredOutput(request: GenerateRequest): Promise<StructuredResponse> {
-    const { keyword, promptTemplate, promptId } = request;
+    const { 
+      keyword, 
+      promptTemplate, 
+      promptId,
+      model: requestModel,
+      temperature: requestTemperature,
+      maxTokens: requestMaxTokens,
+      systemPrompt: requestSystemPrompt,
+      userPrompt,
+      responseFormat: requestResponseFormat
+    } = request;
     
-    // Determine which prompt to use
+    // Get prompt template with settings
+    let promptTemplateObj: any = null;
     let finalPrompt: string;
     
-    if (promptTemplate) {
+    if (userPrompt) {
+      // Use custom user prompt if provided
+      finalPrompt = userPrompt.replace('{keyword}', keyword);
+    } else if (promptTemplate) {
       // Use custom prompt template if provided
       finalPrompt = promptTemplate.replace('{keyword}', keyword);
     } else if (promptId) {
       // Use prompt from repository by ID
-      finalPrompt = pullPrompt(promptId).replace('{keyword}', keyword);
+      promptTemplateObj = pullPromptTemplate(promptId);
+      finalPrompt = promptTemplateObj?.template.replace('{keyword}', keyword) || 
+                   pullPrompt(promptId).replace('{keyword}', keyword);
     } else {
       // Use default prompt
-      finalPrompt = pullPrompt(this.defaultPromptId).replace('{keyword}', keyword);
+      promptTemplateObj = pullPromptTemplate(this.defaultPromptId);
+      finalPrompt = promptTemplateObj?.template.replace('{keyword}', keyword) || 
+                   pullPrompt(this.defaultPromptId).replace('{keyword}', keyword);
     }
+
+    // Use settings from prompt template, with request overrides
+    const model = requestModel || promptTemplateObj?.model || 'gpt-3.5-turbo';
+    const temperature = requestTemperature ?? promptTemplateObj?.temperature ?? 0.7;
+    const maxTokens = requestMaxTokens || promptTemplateObj?.maxTokens || 1000;
+    const systemPrompt = requestSystemPrompt || promptTemplateObj?.systemPrompt || 
+                        'You are a helpful assistant that provides structured responses. Always respond with valid JSON in this exact format: {"response": [{"heading": "Title", "description": "Description"}, {"heading": "Title 2", "description": "Description 2"}]}. Each item must have both "heading" and "description" fields.';
+    const responseFormat = requestResponseFormat || promptTemplateObj?.responseFormat || { type: 'json_object' };
 
     try {
       const completion = await this.client.chat.completions.create({
-        model: 'gpt-3.5-turbo',
+        model,
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful assistant that provides structured responses. Always respond with valid JSON in this exact format: {"response": [{"heading": "Title", "description": "Description"}, {"heading": "Title 2", "description": "Description 2"}]}. Each item must have both "heading" and "description" fields.'
+            content: systemPrompt
           },
           {
             role: 'user',
             content: finalPrompt
           }
         ],
-        response_format: { type: 'json_object' },
-        temperature: 0.7,
-        max_tokens: 1000,
+        response_format: responseFormat,
+        temperature,
+        max_tokens: maxTokens,
       });
 
       const responseContent = completion.choices[0]?.message?.content;

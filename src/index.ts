@@ -144,22 +144,9 @@ async function main(): Promise<void> {
     console.log(`📋 Using prompt type: ${promptId}`);
     
     const structuredResponse = await openaiGenerator.generateStructuredOutput(request);
-    
-    // Create a structured output record
-    const openaiOutput = generator.generateOutput('openai_response', {
-      keyword: request.keyword,
-      subtopics: structuredResponse.response
-    }, {
-      source: 'openai_api',
-      model: 'gpt-3.5-turbo',
-      prompt_id: request.promptId
-    });
 
-    console.log('\n📋 OpenAI Structured Response:');
+    console.log('\n📋 OpenAI Response:');
     console.log(JSON.stringify(structuredResponse, null, 2));
-    
-    console.log('\n💾 Stored as Structured Output:');
-    console.log(JSON.stringify(openaiOutput, null, 2));
 
   } catch (error) {
     console.error('\n❌ OpenAI API Error:', error instanceof Error ? error.message : error);
