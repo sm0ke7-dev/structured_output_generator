@@ -1,0 +1,140 @@
+{
+  "input": {
+    "GenerateRequest": {
+      "description": "Input structure for generating structured output",
+      "fields": {
+        "keyword": {
+          "type": "string",
+          "required": true,
+          "description": "The main keyword or topic to generate content for"
+        },
+        "promptTemplate": {
+          "type": "string",
+          "required": false,
+          "description": "Custom prompt template to use"
+        },
+        "promptId": {
+          "type": "string",
+          "required": false,
+          "description": "ID of the prompt template to use from repository"
+        },
+        "model": {
+          "type": "string",
+          "required": false,
+          "description": "OpenAI model to use (gpt-4o, gpt-3.5-turbo, etc.)"
+        },
+        "temperature": {
+          "type": "number",
+          "required": false,
+          "description": "Creativity level (0.0 to 2.0)"
+        },
+        "maxTokens": {
+          "type": "number",
+          "required": false,
+          "description": "Maximum number of tokens in response"
+        },
+        "systemPrompt": {
+          "type": "string",
+          "required": false,
+          "description": "Custom system prompt to override default"
+        },
+        "userPrompt": {
+          "type": "string",
+          "required": false,
+          "description": "Custom user prompt to override generated prompt"
+        },
+        "responseFormat": {
+          "type": "object",
+          "required": false,
+          "description": "Response format specification"
+        }
+      }
+    }
+  },
+  "output": {
+    "Subtopic": {
+      "description": "Individual subtopic structure",
+      "fields": {
+        "heading": {
+          "type": "string",
+          "required": true,
+          "description": "The title or heading for this subtopic"
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "description": "A brief description explaining this subtopic"
+        }
+      }
+    },
+    "StructuredResponse": {
+      "description": "Main response structure containing array of subtopics",
+      "fields": {
+        "response": {
+          "type": "array",
+          "required": true,
+          "description": "Array of Subtopic objects",
+          "items": "Subtopic"
+        }
+      }
+    }
+  },
+  "prompt": {
+    "PromptTemplate": {
+      "description": "Prompt template structure for repository",
+      "fields": {
+        "name": {
+          "type": "string",
+          "required": true,
+          "description": "Human-readable name of the prompt"
+        },
+        "description": {
+          "type": "string",
+          "required": true,
+          "description": "Description of what this prompt does"
+        },
+        "template": {
+          "type": "string",
+          "required": true,
+          "description": "The prompt template with {keyword} placeholder"
+        },
+        "category": {
+          "type": "string",
+          "required": true,
+          "description": "Category of the prompt (content-generation, analysis, etc.)"
+        },
+        "tags": {
+          "type": "array",
+          "required": true,
+          "description": "Array of tags for categorization",
+          "items": "string"
+        },
+        "model": {
+          "type": "string",
+          "required": false,
+          "description": "Default OpenAI model for this prompt"
+        },
+        "temperature": {
+          "type": "number",
+          "required": false,
+          "description": "Default temperature setting"
+        },
+        "maxTokens": {
+          "type": "number",
+          "required": false,
+          "description": "Default max tokens setting"
+        },
+        "systemPrompt": {
+          "type": "string",
+          "required": false,
+          "description": "Custom system prompt for this template"
+        },
+        "responseFormat": {
+          "type": "object",
+          "required": false,
+          "description": "Response format specification"
+        }
+      }
+    }
+  }
+} 

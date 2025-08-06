@@ -1,12 +1,45 @@
 /**
- * Pull prompt function for retrieving prompt templates
+ * Pull prompt function for retrieving prompt templates and structure definitions
  * 
- * This function acts as a repository layer for accessing prompt templates.
+ * This function acts as a repository layer for accessing prompt templates and structures.
  * It can be extended to pull from different sources (database, files, etc.)
  */
 
 import * as fs from 'fs';
 import * as path from 'path';
+
+// Structure definitions
+export interface Subtopic {
+  heading: string;
+  description: string;
+}
+
+export interface StructuredResponse {
+  response: Subtopic[];
+}
+
+export interface GenerateRequest {
+  // Core content
+  keyword: string;
+  promptTemplate?: string;
+  promptId?: string;
+  
+  // Model configuration
+  model?: string;
+  temperature?: number;
+  maxTokens?: number;
+  
+  // Custom prompts
+  systemPrompt?: string;
+  userPrompt?: string;
+  
+  // Response format
+  responseFormat?: { type: 'json_object' | 'text' };
+}
+
+export interface ResponseFormat {
+  type: 'json_object' | 'text';
+}
 
 export interface PromptTemplate {
   name: string;
@@ -16,17 +49,15 @@ export interface PromptTemplate {
   tags: string[];
   
   // Model configuration parameters
-  model?: string;           // "gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo", etc.
-  temperature?: number;     // 0.0 to 2.0
-  maxTokens?: number;       // max_tokens
+  model?: string;
+  temperature?: number;
+  maxTokens?: number;
   
   // Custom prompts
-  systemPrompt?: string;    // Override default system prompt
+  systemPrompt?: string;
   
   // Response format
-  responseFormat?: { 
-    type: 'json_object' | 'text';
-  };
+  responseFormat?: ResponseFormat;
 }
 
 export interface PromptData {
@@ -37,6 +68,49 @@ export interface PullPromptOptions {
   fallbackToDefault?: boolean;
   throwOnNotFound?: boolean;
 }
+
+// Utility functions for consistent structure handling
+export const STRUCTURE_UTILS: {
+  getSystemPrompt: (customPrompt?: string) => string;
+  getResponseFormat: () => ResponseFormat;
+  validateResponse: (response: any) => asserts response is StructuredResponse;
+} = {
+  // Get the standard system prompt with the correct structure
+  getSystemPrompt: (customPrompt?: string): string => {
+    const basePrompt = 'You are a helpful assistant that provides structured responses. Always respond with valid JSON in this exact format: {"response": [{"heading": "Title", "description": "Description"}, {"heading": "Title 2", "description": "Description 2"}]}. Each item must have both "heading" and "description" fields.';
+    return customPrompt || basePrompt;
+  },
+
+  // Get the standard response format
+  getResponseFormat: (): ResponseFormat => ({
+    type: 'json_object'
+  }),
+
+  // Validate response structure
+  validateResponse: (response: any): asserts response is StructuredResponse => {
+    if (!response || typeof response !== 'object') {
+      throw new Error('Invalid response structure: expected an object');
+    }
+
+    if (!Array.isArray(response.response)) {
+      throw new Error('Invalid response structure: expected "response" to be an array');
+    }
+
+    for (const item of response.response) {
+      if (typeof item !== 'object' || item === null) {
+        throw new Error('Invalid response structure: each item should be an object');
+      }
+
+      if (typeof item.heading !== 'string') {
+        throw new Error('Invalid response structure: each item should have a "heading" string');
+      }
+
+      if (typeof item.description !== 'string') {
+        throw new Error('Invalid response structure: each item should have a "description" string');
+      }
+    }
+  }
+};
 
 /**
  * Load prompt data from multiple files

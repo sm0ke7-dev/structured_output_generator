@@ -1,41 +1,15 @@
 import OpenAI from 'openai';
-import { pullPrompt, pullPromptTemplate } from './repositories/pull_prompt';
+import { 
+  pullPrompt, 
+  pullPromptTemplate, 
+  StructuredResponse, 
+  GenerateRequest, 
+  ResponseFormat, 
+  STRUCTURE_UTILS 
+} from './repositories/pull_prompt';
 
-// Define the structure for subtopics
-export interface Subtopic {
-  heading: string;
-  description: string;
-}
-
-// Define the response structure
-export interface StructuredResponse {
-  response: Subtopic[];
-}
-
-// Define response format options
-export interface ResponseFormat {
-  type: 'json_object' | 'text';
-}
-
-// Define the input structure
-export interface GenerateRequest {
-  // Core content
-  keyword: string;
-  promptTemplate?: string;
-  promptId?: string;
-  
-  // Model configuration
-  model?: string;           // "gpt-4o", "gpt-4o-mini", "gpt-3.5-turbo", etc.
-  temperature?: number;     // 0.0 to 2.0
-  maxTokens?: number;       // max_tokens
-  
-  // Custom prompts
-  systemPrompt?: string;    // Override default system prompt
-  userPrompt?: string;      // Override the generated user prompt
-  
-  // Response format
-  responseFormat?: { type: 'json_object' | 'text' };
-}
+// Re-export types for backward compatibility
+export type { StructuredResponse, GenerateRequest, ResponseFormat };
 
 export class OpenAIGenerator {
   private client: OpenAI;
@@ -89,9 +63,8 @@ export class OpenAIGenerator {
     const model = requestModel || promptTemplateObj?.model || 'gpt-3.5-turbo';
     const temperature = requestTemperature ?? promptTemplateObj?.temperature ?? 0.7;
     const maxTokens = requestMaxTokens || promptTemplateObj?.maxTokens || 1000;
-    const systemPrompt = requestSystemPrompt || promptTemplateObj?.systemPrompt || 
-                        'You are a helpful assistant that provides structured responses. Always respond with valid JSON in this exact format: {"response": [{"heading": "Title", "description": "Description"}, {"heading": "Title 2", "description": "Description 2"}]}. Each item must have both "heading" and "description" fields.';
-    const responseFormat = requestResponseFormat || promptTemplateObj?.responseFormat || { type: 'json_object' };
+    const systemPrompt = requestSystemPrompt || promptTemplateObj?.systemPrompt || STRUCTURE_UTILS.getSystemPrompt();
+    const responseFormat = requestResponseFormat || promptTemplateObj?.responseFormat || STRUCTURE_UTILS.getResponseFormat();
 
     try {
       const completion = await this.client.chat.completions.create({
@@ -121,7 +94,7 @@ export class OpenAIGenerator {
       const parsedResponse = JSON.parse(responseContent) as StructuredResponse;
       
       // Validate the response structure
-      this.validateResponse(parsedResponse);
+      STRUCTURE_UTILS.validateResponse(parsedResponse);
       
       return parsedResponse;
 
@@ -133,32 +106,7 @@ export class OpenAIGenerator {
     }
   }
 
-  /**
-   * Validate the response structure
-   */
-  private validateResponse(response: any): asserts response is StructuredResponse {
-    if (!response || typeof response !== 'object') {
-      throw new Error('Invalid response structure: expected an object');
-    }
 
-    if (!Array.isArray(response.response)) {
-      throw new Error('Invalid response structure: expected "response" to be an array');
-    }
-
-    for (const item of response.response) {
-      if (typeof item !== 'object' || item === null) {
-        throw new Error('Invalid response structure: each item should be an object');
-      }
-
-      if (typeof item.heading !== 'string') {
-        throw new Error('Invalid response structure: each item should have a "heading" string');
-      }
-
-      if (typeof item.description !== 'string') {
-        throw new Error('Invalid response structure: each item should have a "description" string');
-      }
-    }
-  }
 
   /**
    * Set a custom default prompt ID
